@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+}
+
+model Student {
+  std_id         Int        @id @default(autoincrement())
+  std_frist_name String
+  std_last_name  String
+  std_username   String
+  std_email      String
+  std_password   String
+  std_img        String
+  user           user[]
+  class          Class[]
+  register       Register[]
+
+  @@map("student")
+}
+
+model user {
+  user_id       Int     @id @default(autoincrement())
+  user_type     Role
+  teacher       Teacher @relation(fields: [teacherTc_id], references: [tc_id], onDelete: Cascade, onUpdate: Cascade)
+  teacherTc_id  Int
+  student       Student @relation(fields: [studentStd_id], references: [std_id], onDelete: Cascade, onUpdate: Cascade)
+  studentStd_id Int
+}
+
+model Teacher {
+  tc_id           Int       @id @default(autoincrement())
+  tc_first_name   String
+  tc_last_name    String
+  tc_email        String
+  tc_username     String
+  tc_password     String
+  tc_img          String
+  subject         Subject   @relation(fields: [subjectSj_id], references: [sj_id], onDelete: Cascade, onUpdate: Cascade)
+  user            user[]
+  subjectSj_id    Int
+  signature       Signature @relation(fields: [signatureSnt_id], references: [snt_id], onDelete: Cascade, onUpdate: Cascade)
+  signatureSnt_id Int
+  class           Class[]
+
+  @@map("teacher")
+}
+
+model Subject {
+  sj_id      Int        @id @default(autoincrement())
+  sj_subject String
+  sj_grade   Int
+  sj_credit  Int
+  term       Trem       @relation(fields: [tremTr_id], references: [tr_id], onDelete: Cascade, onUpdate: Cascade)
+  Teacher    Teacher[]
+  tremTr_id  Int
+  register   Register[]
+
+  @@map("subject")
+}
+
+model Class {
+  cl_id           Int     @id @default(autoincrement())
+  cl_quantity_STD Int
+  teacher         Teacher @relation(fields: [teacherTc_id], references: [tc_id], onDelete: Cascade, onUpdate: Cascade)
+  teacherTc_id    Int
+  student         Student @relation(fields: [studentStd_id], references: [std_id], onDelete: Cascade, onUpdate: Cascade)
+  studentStd_id   Int
+
+  @@map("class")
+}
+
+model Trem {
+  tr_id       Int       @id @default(autoincrement())
+  tr_datetime DateTime
+  subject     Subject[]
+
+  @@map("trem")
+}
+
+model Signature {
+  snt_id  Int       @id @default(autoincrement())
+  snt_img String
+  teacher Teacher[]
+
+  @@map("signature")
+}
+
+model Register {
+  rgt_id        Int     @id @default(autoincrement())
+  student       Student @relation(fields: [studentStd_id], references: [std_id], onDelete: Cascade, onUpdate: Cascade)
+  studentStd_id Int
+  subject       Subject @relation(fields: [subjectSj_id], references: [sj_id],onDelete: Cascade,onUpdate: Cascade)
+  subjectSj_id  Int
+}
